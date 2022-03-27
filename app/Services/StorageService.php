@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\DB;
 use App\Models\Balance;
 use App\Models\Foods;
 use App\Models\Storages;
@@ -73,5 +74,39 @@ class StorageService
         }
 
         return $storages;
+    }
+
+    // QUERY BUILDER Реализация
+    // Суть реализации: Повторение функционала выше БЕЗ использования моделей
+    
+    /**
+     * Query-builder реализация getCurrentStoragesBalance()
+     */
+    public static function getCurrentStoragesBalanceQBVersion(): array
+    {
+        $result = [];
+
+        $storagesLoaded = DB::table('balance')
+            ->pluck('loaded', 'id_storages');
+
+        $availableStorages = DB::table('storages')
+            ->select('storages.id', 'storages.name', 'storages.volume', 'foods.id as id_foods', 'foods.name as name_foods')
+            ->leftJoin('foods', 'foods.id', '=', 'storages.id_foods')
+            ->get()
+            ->all();
+
+        foreach ($availableStorages as $st) {
+            $loaded = !empty($storagesLoaded[$st->id]) ? $storagesLoaded[$st->id] : 0;
+
+            $result[] = [
+                'storage_name'          => $st->name,
+                'food_name'             => $st->name_foods,
+                'storage_volume'        => $st->volume,
+                'storage_loaded_m3'     => $loaded,
+                'storage_loaded_kg'     => $loaded > 0 ? ConvertHelper::convertFoodVolumeToWeight($st->name_foods, (float)$loaded) : 0
+            ];
+        }
+
+        return $result;
     }
 }

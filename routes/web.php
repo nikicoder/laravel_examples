@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LessTwoExamplesController;
+use App\Http\Controllers\LessThreeExamplesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,4 +23,8 @@ Route::group(['prefix' => 'less2'], function () {
     Route::get('example1', [LessTwoExamplesController::class, 'exampleOne']);
     Route::get('example2', [LessTwoExamplesController::class, 'exampleTwo']);
     Route::get('example3', [LessTwoExamplesController::class, 'exampleThree']);
+});
+
+Route::group(['prefix' => 'less3'], function () {
+    Route::get('foods-query-builder', [LessThreeExamplesController::class, 'getFoodsBalance']);
 });
